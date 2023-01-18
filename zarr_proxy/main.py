@@ -2,6 +2,7 @@ import logging
 import sys
 
 from fastapi import FastAPI
+
 from .api import ping
 
 
@@ -18,13 +19,14 @@ def get_logger() -> logging.Logger:
     logger.addHandler(handler)
     return logger
 
+
 logger = get_logger()
 
 
 def create_application() -> FastAPI:
     application = FastAPI()
     application.include_router(ping.router, tags=["ping"])
-  
+
     return application
 
 
