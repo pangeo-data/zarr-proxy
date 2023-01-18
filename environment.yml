@@ -7,3 +7,4 @@ dependencies:
   - uvicorn
   - fastapi 
   - zarr
+  - pytest
