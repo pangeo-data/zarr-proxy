@@ -1,6 +1,17 @@
 """Logic for the zarr proxy"""
 
 
+def chunks_from_string(chunks: str) -> tuple[int]:
+    """
+    Given a string of comma-separated integers, return a tuple of ints
+
+    Parameters
+    ----------
+    chunks: e.g. "1,2,3"
+    """
+    return tuple(int(c) for c in chunks.split(","))
+
+
 def chunk_id_to_slice(
     chunk_key: str, *, chunks: tuple[int], shape: tuple[int], delimiter: str = "."
 ) -> tuple[slice]:

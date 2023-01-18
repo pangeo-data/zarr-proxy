@@ -1,23 +1,45 @@
 import json
 
-from fastapi import APIRouter
 import zarr
+from fastapi import APIRouter
 from starlette.responses import Response
 
-from ..logic import chunk_id_to_slice
+from ..logging import get_logger
+from ..logic import chunk_id_to_slice, chunks_from_string
 
 router = APIRouter()
+logger = get_logger()
+
+
+def open_store(*, host: str, path: str) -> zarr.storage.FSStore:
+    base_url = f"https://{host}/{path}"
+    logger.info(f"Opening store: {base_url}")
+    return zarr.storage.FSStore(base_url)
+
+
+@router.get("/{host}/{path:path}/.zmetadata")
+def get_zmetadata(host: str, path: str) -> dict:
+    store = open_store(host=host, path=path)
+    return json.loads(store[".zmetadata"].decode())
+
+
+@router.get("/{host}/{path:path}/.zattrs")
+def get_zattrs(host: str, path: str) -> dict:
+    store = open_store(host=host, path=path)
+    return json.loads(store[".zattrs"].decode())
+
+
+@router.get("/{host}/{path:path}/.zgroup")
+def get_zgroup(host: str, path: str) -> dict:
+    store = open_store(host=host, path=path)
+    return json.loads(store[".zgroup"].decode())
 
 
 @router.get("/{host}/{path:path}/.zarray")
-def get_dataset(host: str, path: str, chunks: str) -> dict:
+def get_zarray(host: str, path: str, chunks: str) -> dict:
 
-    fname = ".zarray"
-    chunks = tuple(int(c) for c in chunks.split(','))
-
-    # return {"host": host, "path": path, "chunks": chunks}
-    base_url = f"https://{host}/{path}"
-    store = zarr.storage.FSStore(base_url)
+    chunks = chunks_from_string(chunks)
+    store = open_store(host=host, path=path)
 
     # Rewrite chunks
     meta = json.loads(store[".zarray"].decode())
@@ -30,12 +52,8 @@ def get_dataset(host: str, path: str, chunks: str) -> dict:
 @router.get("/{host}/{path:path}/{chunk_key}")
 def get_chunk(host: str, path: str, chunk_key: str, chunks: str) -> bytes:
 
-    base_url = f"https://{host}/{path}"
-    store = zarr.storage.FSStore(base_url)
-
-    chunks = tuple(int(c) for c in chunks.split(','))
-
+    store = open_store(host=host, path=path)
+    chunks = chunks_from_string(chunks)
     arr = zarr.open(store, mode="r")
     data = arr[chunk_id_to_slice(chunk_key, chunks=chunks, shape=arr.shape)]
-    response = Response(data.tobytes(), media_type='application/octet-stream')
-    return response
+    return Response(data.tobytes(), media_type='application/octet-stream')

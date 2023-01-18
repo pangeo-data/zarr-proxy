@@ -9,3 +9,6 @@ dependencies:
   - zarr
   - pytest
   - httpx
+  - fsspec
+  - aiohttp
+  - requests
