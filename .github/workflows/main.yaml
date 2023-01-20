@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Daily “At 00:00” UTC
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11']
+
+    name: Python ${{ matrix.python-version }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up conda environment
+        uses: mamba-org/provision-with-micromamba@v14
+        with:
+          micromamba-version: latest
+          channel-priority: strict
+          environment-file: environment.yml
+          environment-name: zarr-proxy
+          cache-env: true
+          extra-specs: |
+            python=${{ matrix.python-version }}
+
+      - name: Run tests
+        id: status
+        run: |
+          python -m pytest
