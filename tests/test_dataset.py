@@ -6,7 +6,7 @@ import pytest
     ['storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr'],
 )
 def test_dataset_zarray(test_app, store):
-    response = test_app.get(f"/dataset/{store}/air/.zarray?chunks=10,10,10")
+    response = test_app.get(f"/dataset/{store}/air/.zarray", headers={'chunks': '10,10,10'})
     assert response.status_code == 200
 
     assert {
