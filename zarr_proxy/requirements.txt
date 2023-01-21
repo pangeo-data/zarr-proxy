@@ -1,7 +1,6 @@
 aiohttp
 fastapi
 fsspec
-gunicorn
 mangum
 requests
 uvicorn

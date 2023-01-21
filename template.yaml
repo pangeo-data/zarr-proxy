@@ -10,7 +10,8 @@ Resources:
   AppFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: zarr_proxy/
+      FunctionName: zarr-proxy
+      CodeUri: ./
       Handler: zarr_proxy.main.handler
       Runtime: python3.9
       Events:
@@ -28,4 +29,4 @@ Resources:
 Outputs:
   Api:
     Description: 'API Gateway endpoint URL for Prod stage for App function'
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
