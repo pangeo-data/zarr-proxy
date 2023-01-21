@@ -28,7 +28,13 @@ Resources:
             Path: /{proxy+}
             Method: ANY
 
+  AppLambdaUrl:
+    Type: 'AWS::Lambda::Url'
+    Properties:
+      AuthType: NONE
+      TargetFunctionArn: !Ref AppFunction
+
 Outputs:
-  Api:
-    Description: 'API Gateway endpoint URL for Prod stage for App function'
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
+  AppLambdaUrl:
+    Description: 'The URL of the Lambda function'
+    Value: !GetAtt AppLambdaUrl.FunctionUrl
