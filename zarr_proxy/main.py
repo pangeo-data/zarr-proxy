@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from .api import store
+from . import store
 from .logging import get_logger
 
 

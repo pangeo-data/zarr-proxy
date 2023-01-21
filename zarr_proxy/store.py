@@ -4,8 +4,8 @@ import zarr
 from fastapi import APIRouter, Header
 from starlette.responses import Response
 
-from ..logging import get_logger
-from ..logic import chunk_id_to_slice, chunks_from_string
+from .logging import get_logger
+from .logic import chunk_id_to_slice, chunks_from_string
 
 router = APIRouter()
 logger = get_logger()

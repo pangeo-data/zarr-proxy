@@ -3,11 +3,12 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - uvicorn
-  - fastapi
-  - zarr
-  - pytest
-  - httpx
-  - fsspec
   - aiohttp
+  - fastapi
+  - fsspec
+  - httpx
+  - mangum
+  - pytest
   - requests
+  - uvicorn
+  - zarr
