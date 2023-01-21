@@ -44,4 +44,4 @@ jobs:
         run: sam build --use-container
       # Prevent prompts and failure when the stack is unchanged
       - name: Deploy to AWS Lambda
-        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name zarr-proxy
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
