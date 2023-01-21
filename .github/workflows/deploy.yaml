@@ -1,0 +1,46 @@
+name: aws-lambda-deployment
+
+on:
+  push:
+    branches:
+      - main
+  # pull_request:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_USER: ${{ secrets.AWS_USER }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - uses: aws-actions/setup-sam@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-2
+
+        # Build inside Docker containers
+      - name: Build lambda function
+        run: sam build --use-container
+      # Prevent prompts and failure when the stack is unchanged
+      - name: Deploy to AWS Lambda
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset

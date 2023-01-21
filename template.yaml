@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Zarr Proxy on Lambda
+
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: 'ZarryProxyLambda'
+      CodeUri: zarr_proxy
+      Handler: main.handler
+      Runtime: python3.9
+      Events:
+        Api:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+
+Outputs:
+  ApiUrl:
+    Description: URL of your API
+    Value:
+      Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
