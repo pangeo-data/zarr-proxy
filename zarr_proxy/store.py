@@ -4,7 +4,7 @@ import zarr
 from fastapi import APIRouter, Header
 from starlette.responses import Response
 
-from .logging import get_logger
+from .log import get_logger
 from .logic import chunk_id_to_slice, chunks_from_string
 
 router = APIRouter()
@@ -15,6 +15,11 @@ def open_store(*, host: str, path: str) -> zarr.storage.FSStore:
     base_url = f"https://{host}/{path}"
     logger.info(f"Opening store: {base_url}")
     return zarr.storage.FSStore(base_url)
+
+
+@router.get("/ping")
+def ping() -> dict:
+    return {"ping": "pong"}
 
 
 @router.get("/{host}/{path:path}/.zmetadata")

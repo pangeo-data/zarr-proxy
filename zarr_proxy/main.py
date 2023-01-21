@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from mangum import Mangum
 
 from . import store
-from .logging import get_logger
+from .log import get_logger
 
 
 def create_application() -> FastAPI:
