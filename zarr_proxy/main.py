@@ -1,13 +1,13 @@
 from fastapi import FastAPI
 from mangum import Mangum
 
-from . import store
 from .log import get_logger
+from .store import router as store_router
 
 
 def create_application() -> FastAPI:
     application = FastAPI()
-    application.include_router(store.router, tags=["main"])
+    application.include_router(store_router, tags=["main"])
 
     return application
 
