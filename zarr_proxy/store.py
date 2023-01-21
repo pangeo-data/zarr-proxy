@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 import json
+import typing
 
 import zarr
 from fastapi import APIRouter, Header
@@ -43,7 +42,7 @@ def get_zgroup(host: str, path: str) -> dict:
 
 
 @router.get("/{host}/{path:path}/.zarray")
-def get_zarray(host: str, path: str, chunks: str | None = Header(default=None)) -> dict:
+def get_zarray(host: str, path: str, chunks: typing.Union[str, None] = Header(default=None)) -> dict:
 
     chunks = chunks_from_string(chunks)
     store = open_store(host=host, path=path)
@@ -57,7 +56,9 @@ def get_zarray(host: str, path: str, chunks: str | None = Header(default=None)) 
 
 
 @router.get("/{host}/{path:path}/{chunk_key}")
-def get_chunk(host: str, path: str, chunk_key: str, chunks: str | None = Header(default=None)) -> bytes:
+def get_chunk(
+    host: str, path: str, chunk_key: str, chunks: typing.Union[str, None] = Header(default=None)
+) -> bytes:
 
     logger.info(f"Getting chunk: {chunk_key}")
     logger.info(f"Chunks: {chunks}")
