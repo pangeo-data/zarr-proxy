@@ -1,25 +1,31 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Zarr Proxy on Lambda
+Description: >
+  Zarr Proxy on Lambda
+# Globals:
+#   Function:
+#     Timeout: 3
 
 Resources:
-  Function:
+  AppFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: zarr_proxy/
       Handler: main.handler
       Runtime: python3.9
       Events:
-        Api:
-          Type: HttpApi
+        Root:
+          Type: Api
           Properties:
-            ApiId: !Ref Api
-
-  Api:
-    Type: AWS::Serverless::HttpApi
+            Path: /
+            Method: ANY
+        NonRoot:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
 
 Outputs:
-  ApiUrl:
-    Description: URL of your API
-    Value:
-      Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
+  Api:
+    Description: 'API Gateway endpoint URL for Prod stage for App function'
+    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/prod/'
