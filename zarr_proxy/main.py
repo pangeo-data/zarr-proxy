@@ -13,7 +13,6 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
-handler = Mangum(app)
 
 
 @app.on_event("startup")
@@ -27,3 +26,6 @@ async def startup_event():
 async def shutdown_event():
     logger = get_logger()
     logger.info("Application shutdown...")
+
+
+handler = Mangum(app)
