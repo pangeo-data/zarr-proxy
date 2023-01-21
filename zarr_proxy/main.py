@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from mangum import Mangum
 
 from . import store
 from .logging import get_logger
@@ -12,6 +13,7 @@ def create_application() -> FastAPI:
 
 
 app = create_application()
+handler = Mangum(app)
 
 
 @app.on_event("startup")
