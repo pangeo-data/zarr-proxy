@@ -6,8 +6,7 @@ Resources:
   Function:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: 'ZarryProxyLambda'
-      CodeUri: zarr_proxy
+      CodeUri: zarr_proxy/
       Handler: main.handler
       Runtime: python3.9
       Events:
