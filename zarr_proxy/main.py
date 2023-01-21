@@ -1,13 +1,12 @@
 from fastapi import FastAPI
 
-from .api import dataset, ping
+from .api import store
 from .logging import get_logger
 
 
 def create_application() -> FastAPI:
     application = FastAPI()
-    application.include_router(ping.router, tags=["ping"])
-    application.include_router(dataset.router, tags=["dataset"], prefix="/dataset")
+    application.include_router(store.router, tags=["main"])
 
     return application
 

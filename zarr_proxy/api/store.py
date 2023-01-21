@@ -1,5 +1,4 @@
 import json
-import urllib
 
 import zarr
 from fastapi import APIRouter, Header
@@ -10,18 +9,6 @@ from ..logic import chunk_id_to_slice, chunks_from_string
 
 router = APIRouter()
 logger = get_logger()
-
-
-def parse_url_into_parts(*, url: str) -> dict:
-    parsed = urllib.parse.urlparse(url)
-    return {
-        "scheme": parsed.scheme,
-        "netloc": parsed.netloc,
-        "path": parsed.path.lstrip("/"),
-        "params": parsed.params,
-        "query": parsed.query,
-        "fragment": parsed.fragment,
-    }
 
 
 def open_store(*, host: str, path: str) -> zarr.storage.FSStore:
@@ -57,15 +44,13 @@ def get_zarray(host: str, path: str, chunks: str | None = Header(default=None)) 
     # Rewrite chunks
     meta = json.loads(store[".zarray"].decode())
     meta["chunks"] = chunks
-    meta["compressor"] = {}
+    meta["compressor"] = None
     meta["filters"] = []
     return meta
 
 
 @router.get("/{host}/{path:path}/{chunk_key}")
-def get_chunk(
-    host: str, path: str, chunk_key: str, chunks: str | None = Header(default=None)
-) -> bytes:
+def get_chunk(host: str, path: str, chunk_key: str, chunks: str | None = Header(default=None)) -> bytes:
 
     logger.info(f"Getting chunk: {chunk_key}")
     logger.info(f"Chunks: {chunks}")
