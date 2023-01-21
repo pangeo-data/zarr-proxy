@@ -17,6 +17,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_USER: ${{ secrets.AWS_USER }}
+  SAM_CLI_TELEMETRY: 0 # Disable SAM CLI telemetry
 
 jobs:
   deploy:
@@ -43,4 +44,4 @@ jobs:
         run: sam build --use-container
       # Prevent prompts and failure when the stack is unchanged
       - name: Deploy to AWS Lambda
-        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name zarr-proxy
