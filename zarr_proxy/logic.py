@@ -28,18 +28,13 @@ def chunk_id_to_slice(
     chunk_index = tuple(int(c) for c in chunk_key.split("."))
 
     if len(chunk_index) != len(chunks):
-        raise ValueError(
-            f"The length of chunk_index: {chunk_index} and chunks: {chunks} must be the same."
-        )
+        raise ValueError(f"The length of chunk_index: {chunk_index} and chunks: {chunks} must be the same.")
 
     if len(shape) != len(chunks):
         raise ValueError(f"The length of shape: {shape} and chunks: {chunks} must be the same.")
 
     # TODO: more error handling maybe?
     slices = tuple(
-        (
-            slice(min(c * ci, s), min(c * (ci + 1), s))
-            for c, s, ci in zip(chunks, shape, chunk_index)
-        )
+        (slice(min(c * ci, s), min(c * (ci + 1), s)) for c, s, ci in zip(chunks, shape, chunk_index))
     )
     return slices
