@@ -28,4 +28,4 @@ async def shutdown_event():
     logger.info("Application shutdown...")
 
 
-handler = Mangum(app)
+handler = Mangum(app, lifespan="off")
