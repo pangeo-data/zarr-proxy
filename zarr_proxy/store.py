@@ -65,13 +65,13 @@ def get_chunk(
     logger.info(f'Host: {host}, Path: {path}')
 
     store = open_store(host=host, path=path)
-    chunks = chunks_from_string(chunks)
     arr = zarr.open(store, mode="r")
     if chunks is None:
         logger.info("No chunks provided, returning full array")
         data = arr[:]
     else:
         logger.info("Returning chunk")
+        chunks = chunks_from_string(chunks)
         data = arr[chunk_id_to_slice(chunk_key, chunks=chunks, shape=arr.shape)]
 
     return Response(data.tobytes(), media_type='application/octet-stream')
