@@ -44,11 +44,15 @@ def get_zgroup(host: str, path: str) -> dict:
 @router.get("/{host}/{path:path}/.zarray")
 def get_zarray(host: str, path: str, chunks: typing.Union[str, None] = Header(default=None)) -> dict:
 
-    chunks = chunks_from_string(chunks)
     store = open_store(host=host, path=path)
-
     # Rewrite chunks
     meta = json.loads(store[".zarray"].decode())
+
+    if chunks is None:
+        logger.info("No chunks provided, returning full array")
+        chunks = meta["shape"]
+    else:
+        chunks = chunks_from_string(chunks)
     meta["chunks"] = chunks
     meta["compressor"] = None
     meta["filters"] = []
