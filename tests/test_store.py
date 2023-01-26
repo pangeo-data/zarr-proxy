@@ -6,15 +6,15 @@ import pytest
     [
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/air',
-            '10,10',
+            'lat=10,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lat',
-            '5',
+            'lat=5,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon',
-            '10',
+            'lat=10,air=10,10',
         ),
     ],
 )
@@ -65,17 +65,17 @@ def test_store_zmetadata(test_app, store):
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/air',
             '0.0',
-            '10,10',
+            'lat=10,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lat',
             '0',
-            '5',
+            'lat=10,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon',
             '1',
-            '10',
+            'lat=10,air=10,10',
         ),
     ],
 )

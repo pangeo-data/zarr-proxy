@@ -1,15 +1,38 @@
 """Logic for the zarr proxy"""
 
+import re
 
-def chunks_from_string(chunks: str) -> tuple[int]:
-    """
-    Given a string of comma-separated integers, return a tuple of ints
+
+def parse_chunks_header(chunks: str) -> dict[str, tuple[int, ...]]:
+
+    """Parse the chunks header into a dictionary of chunk keys and chunk sizes.
+
+    This turns a string like "bed=10,10,prec=20,20,lat=5" into a dictionary like
+    {"bed": (10, 10), "prec": (20, 20), "lat": (5,)}.
 
     Parameters
     ----------
-    chunks: e.g. "1,2,3"
+    chunks: str
+        e.g. "bed=10,10,prec=20,20,lat=5"
+
+    Returns
+    -------
+    dict[str, tuple[int, ...]]
+        e.g. {"bed": (10, 10), "prec": (20, 20), "lat": (5,)}
+
+
     """
-    return tuple(int(c) for c in chunks.split(","))
+
+    # The regular expression ([a-z]+=[\d,]+) searches for one or more lowercase
+    # letters followed by an equal sign and one or more digits and commas.
+    # This is then wrapped in a capturing group which is returned by the findall function.
+
+    parsed_list = re.findall(r'([a-z]+=[\d,]+)', chunks)
+    parsed_dict = {}
+    for item in parsed_list:
+        key, value = item.split('=')
+        parsed_dict[key] = tuple(map(int, value.strip(',').split(',')))
+    return parsed_dict
 
 
 def chunk_id_to_slice(
