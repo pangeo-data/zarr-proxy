@@ -23,11 +23,15 @@ def parse_chunks_header(chunks: str) -> dict[str, tuple[int, ...]]:
 
     """
 
-    # The regular expression ([a-z]+=[\d,]+) searches for one or more lowercase
-    # letters followed by an equal sign and one or more digits and commas.
-    # This is then wrapped in a capturing group which is returned by the findall function.
+    # ([a-zA-Z]+=[\d,]+) regular expression looks for one or more letters (both uppercase and lowercase)
+    # followed by an equal sign and one or more digits and commas. The letters are grouped
+    # together using square brackets and the "+" symbol specifies that there needs to be one
+    # or more of them. The "A-Z" and "a-z" inside the square brackets specify that it should
+    # match uppercase and lowercase letters. The equal sign and digits and commas are also matched
+    # with the "+" symbol to match one or more of them. The entire match is wrapped in a capturing group,
+    # indicated by the parentheses, which can be used to access the match in the code.
 
-    parsed_list = re.findall(r'([a-z]+=[\d,]+)', chunks)
+    parsed_list = re.findall(r'([a-zA-Z]+=[\d,]+)', chunks)
     parsed_dict = {}
     for item in parsed_list:
         key, value = item.split('=')
