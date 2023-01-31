@@ -49,8 +49,8 @@ def get_zarray(host: str, path: str, chunks: typing.Union[str, None] = Header(de
     meta = json.loads(store[".zarray"].decode())
 
     if chunks is None:
-        logger.info("No chunks provided, returning full array")
-        chunks = meta["shape"]
+        logger.info("No chunks provided, returning original chunks")
+        chunks = meta["chunks"]
     else:
         chunks = chunks_from_string(chunks)
     meta["chunks"] = chunks
