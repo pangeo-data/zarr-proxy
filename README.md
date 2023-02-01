@@ -6,7 +6,7 @@
 
 A web-based client might prefetch and inspect dataset `.zmetadata` before constructing a [`Headers`](https://developer.mozilla.org/en-US/docs/Web/API/Headers/Headers) object with desired `chunks` header(s) to pass on to a Zarr client.
 
-In this example, the `getHeaders()` function includes `chunks` headers for all variables whose existing chunk sizes to not meet the use-case-specific chunk "cap" requirements.
+In this example, the `getHeaders()` constructor includes `chunks` headers for all variables whose existing chunking does not meet the use-case-specific chunk "cap" requirements:
 
 ```js
 const getHeaders = (variables, zmetadata, axes) => {
