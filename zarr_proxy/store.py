@@ -2,7 +2,7 @@ import json
 import typing
 
 import zarr
-from fastapi import APIRouter, Header
+from fastapi import APIRouter, Header, HTTPException
 from starlette.responses import Response
 
 from .log import get_logger
@@ -72,9 +72,20 @@ def get_chunk(
     store = open_store(host=host, path=path)
     arr = zarr.open(store, mode="r")
     if variable_chunks is None:
-        logger.info("No chunks provided, returning full array")
-        data = arr[:]
-    else:
-        data = arr[chunk_id_to_slice(chunk_key, chunks=variable_chunks, shape=arr.shape)]
+        logger.info(f"No chunks provided, using the default chunks: {arr.chunks}")
+        variable_chunks = arr.chunks
 
-    return Response(data.tobytes(), media_type='application/octet-stream')
+    else:
+        logger.info(f"Using chunks provided: {variable_chunks}")
+
+    data_slice = chunk_id_to_slice(chunk_key, chunks=variable_chunks, shape=arr.shape)
+
+    try:
+        data = arr[data_slice]
+        return Response(data.tobytes(), media_type='application/octet-stream')
+
+    except ValueError as exc:
+        message = f"Error getting chunk: {chunk_key} with chunks: {variable_chunks} from array with shape: {arr.shape}. Slice used: {data_slice}"
+        logger.error(message)
+        logger.error(exc)
+        raise HTTPException(status_code=400, detail=message)
