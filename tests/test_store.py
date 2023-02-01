@@ -49,14 +49,29 @@ def test_store_zattrs(test_app, store):
 
 
 @pytest.mark.parametrize(
-    'store',
-    ['storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr'],
+    'store,chunks,expected_air_chunks',
+    [
+        (
+            'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr',
+            '',
+            [25, 53],
+        ),
+        (
+            'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr',
+            'lat=10,air=10,10',
+            [10, 10],
+        ),
+    ],
 )
-def test_store_zmetadata(test_app, store):
-    response = test_app.get(f"/{store}/.zmetadata")
+def test_store_zmetadata(test_app, store, chunks, expected_air_chunks):
+    response = test_app.get(f"/{store}/.zmetadata", headers={'chunks': chunks})
     assert response.status_code == 200
 
-    assert {'.zattrs', '.zgroup'}.issubset(response.json()['metadata'].keys())
+    zmetadata = response.json()['metadata']
+
+    assert {'.zattrs', '.zgroup'}.issubset(zmetadata.keys())
+
+    assert zmetadata['air/.zarray']['chunks'] == expected_air_chunks
 
 
 @pytest.mark.parametrize(

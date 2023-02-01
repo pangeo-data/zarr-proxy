@@ -24,9 +24,25 @@ def ping() -> dict:
 
 
 @router.get("/{host}/{path:path}/.zmetadata")
-def get_zmetadata(host: str, path: str) -> dict:
+def get_zmetadata(host: str, path: str, chunks: typing.Union[list[str], None] = Header(default=None)) -> dict:
+    chunks = parse_chunks_header(chunks[0]) if chunks is not None else {}
     store = open_store(host=host, path=path)
-    return json.loads(store[".zmetadata"].decode())
+    zmetadata = json.loads(store[".zmetadata"].decode())
+    if chunks is None:
+        # return zmetadata as is
+        return zmetadata
+
+    # Rewrite chunks in zmetadata
+    for variable, chunks in chunks.items():
+        try:
+            zmetadata['metadata'][f'{variable}/.zarray']['chunks'] = chunks
+        except KeyError:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Variable {variable} specified in chunks header: {chunks} is not found in the store",
+            )
+
+    return zmetadata
 
 
 @router.get("/{host}/{path:path}/.zattrs")
