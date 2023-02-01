@@ -4,6 +4,7 @@ import functools
 import math
 import operator
 import re
+import typing
 
 
 def parse_chunks_header(chunks: str) -> dict[str, tuple[int, ...]]:
@@ -42,7 +43,9 @@ def parse_chunks_header(chunks: str) -> dict[str, tuple[int, ...]]:
     return parsed_dict
 
 
-def virtual_array_info(*, shape: tuple[int], chunks: tuple[int]) -> dict[str, tuple[int] | int]:
+def virtual_array_info(
+    *, shape: tuple[int, ...], chunks: tuple[int, ...]
+) -> dict[str, typing.Union[tuple[int, ...], int]]:
     """
     Return a dictionary of information about a virtual array
 
@@ -65,7 +68,11 @@ def virtual_array_info(*, shape: tuple[int], chunks: tuple[int]) -> dict[str, tu
 
 
 def validate_chunks_info(
-    *, shape=tuple[int], chunks=tuple[int], chunk_index=tuple[int], chunks_block_shape=tuple[int]
+    *,
+    shape=tuple[int, ...],
+    chunks=tuple[int, ...],
+    chunk_index=tuple[int, ...],
+    chunks_block_shape=tuple[int, ...],
 ):
     """Validate the chunks info. Raise an error if the chunk_index is out of bounds
 
@@ -107,7 +114,7 @@ def validate_chunks_info(
 
 
 def chunk_id_to_slice(
-    chunk_key: str, *, chunks: tuple[int], shape: tuple[int], delimiter: str = "."
+    chunk_key: str, *, chunks: tuple[int, ...], shape: tuple[int, ...], delimiter: str = "."
 ) -> tuple[slice]:
     """
     Given a Zarr chunk key, return the slice of an array to extract that data
