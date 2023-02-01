@@ -1,6 +1,41 @@
 import pytest
 
-from zarr_proxy.logic import chunk_id_to_slice, parse_chunks_header
+from zarr_proxy.logic import (
+    chunk_id_to_slice,
+    parse_chunks_header,
+    validate_chunks_info,
+)
+
+
+@pytest.mark.parametrize(
+    "shape, chunks, chunk_index, chunks_block_shape",
+    [
+        ((5, 5), (2, 2), (0, 0), (2, 2)),
+        ((5, 5), (2, 2), (0, 1), (2, 2)),
+        ((5, 5), (2, 2), (1, 0), (2, 2)),
+        ((5, 5), (2, 2), (1, 1), (2, 2)),
+    ],
+)
+def test_validate_chunks_info_valid(shape, chunks, chunk_index, chunks_block_shape):
+    validate_chunks_info(
+        shape=shape, chunks=chunks, chunk_index=chunk_index, chunks_block_shape=chunks_block_shape
+    )
+
+
+@pytest.mark.parametrize(
+    "shape, chunks, chunk_index, chunks_block_shape",
+    [
+        ((5, 5), (2, 2), (0, 5), (2, 2)),
+        ((5, 5), (2, 2), (5, 0), (2, 2)),
+        ((5, 5), (2, 2), (5, 5), (2, 2)),
+        ((5, 5), (3, 3), (2, 2), (2, 2)),
+    ],
+)
+def test_validate_chunks_info_invalid(shape, chunks, chunk_index, chunks_block_shape):
+    with pytest.raises(IndexError):
+        validate_chunks_info(
+            shape=shape, chunks=chunks, chunk_index=chunk_index, chunks_block_shape=chunks_block_shape
+        )
 
 
 def test_chunk_id_to_slice():

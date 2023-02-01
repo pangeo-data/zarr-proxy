@@ -78,7 +78,15 @@ def get_chunk(
     else:
         logger.info(f"Using chunks provided: {variable_chunks}")
 
-    data_slice = chunk_id_to_slice(chunk_key, chunks=variable_chunks, shape=arr.shape)
+    try:
+        logger.info(
+            f"Getting chunk: {chunk_key} with chunks: {variable_chunks} from array with shape: {arr.shape}"
+        )
+        data_slice = chunk_id_to_slice(chunk_key, chunks=variable_chunks, shape=arr.shape)
+    except IndexError as exc:
+        # The chunk key is not valid or the chunks are not valid
+        logger.error(exc)
+        raise HTTPException(status_code=400, detail=str(exc))
 
     try:
         data = arr[data_slice]

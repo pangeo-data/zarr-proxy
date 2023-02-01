@@ -96,4 +96,4 @@ def test_store_array_chunk_out_of_bounds(test_app):
     response = test_app.get(f"/{array}/{chunk_key}", headers={'chunks': chunks})
 
     assert response.status_code == 400
-    assert f'Error getting chunk: {chunk_key} with chunks' in response.json()['detail']
+    assert 'The chunk_index: (1,) must be less than the chunks block shape: (1,)' in response.json()['detail']
