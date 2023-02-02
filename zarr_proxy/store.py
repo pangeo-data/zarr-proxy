@@ -28,19 +28,16 @@ def get_zmetadata(host: str, path: str, chunks: typing.Union[list[str], None] = 
     chunks = parse_chunks_header(chunks[0]) if chunks is not None else {}
     store = open_store(host=host, path=path)
     zmetadata = json.loads(store[".zmetadata"].decode())
-    if chunks is None:
-        # return zmetadata as is
-        return zmetadata
 
-    # Rewrite chunks in zmetadata
-    for variable, chunks in chunks.items():
-        try:
-            zmetadata['metadata'][f'{variable}/.zarray']['chunks'] = chunks
-        except KeyError:
-            raise HTTPException(
-                status_code=404,
-                detail=f"Variable {variable} specified in chunks header: {chunks} is not found in the store",
-            )
+    # Rewrite chunks and compressor in zmetadata
+    # TODO: we should probably add more validation here to make sure the specified variables
+    # in the chunks header are actually in the zmetadata
+    for item in zmetadata["metadata"]:
+        if item.endswith(".zarray"):
+            variable = item.split("/")[0]
+            variable_chunks = chunks.get(variable, zmetadata["metadata"][item]["chunks"])
+            zmetadata["metadata"][item]["chunks"] = variable_chunks
+            zmetadata["metadata"][item]['compressor'] = None
 
     return zmetadata
 
