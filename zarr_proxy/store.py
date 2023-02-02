@@ -32,12 +32,19 @@ def get_zmetadata(host: str, path: str, chunks: typing.Union[list[str], None] = 
     # Rewrite chunks and compressor in zmetadata
     # TODO: we should probably add more validation here to make sure the specified variables
     # in the chunks header are actually in the zmetadata
+    zmetadata_variables = set()
     for item in zmetadata["metadata"]:
         if item.endswith(".zarray"):
             variable = item.split("/")[0]
+            zmetadata_variables.add(variable)
             variable_chunks = chunks.get(variable, zmetadata["metadata"][item]["chunks"])
             zmetadata["metadata"][item]["chunks"] = variable_chunks
             zmetadata["metadata"][item]['compressor'] = None
+
+    # Check that all variables in the chunks header are in the zmetadata
+    if not zmetadata_variables.issuperset(chunks.keys()):
+        message = f"Invalid chunks header. Variables {sorted(chunks.keys() - zmetadata_variables)} not found in zmetadata: {sorted(zmetadata_variables)}"
+        raise HTTPException(status_code=400, detail=message)
 
     return zmetadata
 

@@ -74,6 +74,20 @@ def test_store_zmetadata(test_app, store, chunks, expected_air_chunks):
     assert zmetadata['air/.zarray']['chunks'] == expected_air_chunks
 
 
+def test_store_mismatching_variable_names(test_app):
+    path = (
+        'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/.zmetadata'
+    )
+    chunks = 'latitude=10,airtemp=10,10'
+    response = test_app.get(f"/{path}", headers={'chunks': chunks})
+
+    assert response.status_code == 400
+    assert (
+        "Invalid chunks header. Variables ['airtemp', 'latitude'] not found in zmetadata:"
+        in response.json()['detail']
+    )
+
+
 @pytest.mark.parametrize(
     'store,chunk_key,chunks',
     [

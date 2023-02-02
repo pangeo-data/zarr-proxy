@@ -58,13 +58,14 @@ def test_chunk_id_to_slice():
         ("", {}),
         ("bed=10,10,prec=20,20,lat=five", {'bed': (10, 10), 'prec': (20, 20)}),
         (
-            'time=6443, analysed_sst=30,100,100, analysis_error=30,100,100, mask=30,100,100, sea_ice_fraction=30,100,100',
+            'time=6443, analysed_sst=30,100,100, analysis_error=30,100,100, mask=30,100,100, sea-ice-fraction=30,100,100, sea surface temperate=30,30',
             {
                 'time': (6443,),
-                'sst': (30, 100, 100),
-                'error': (30, 100, 100),
+                'analysed_sst': (30, 100, 100),
+                'analysis_error': (30, 100, 100),
                 'mask': (30, 100, 100),
-                'fraction': (30, 100, 100),
+                'sea-ice-fraction': (30, 100, 100),
+                'sea surface temperate': (30, 30),
             },
         ),
     ],
