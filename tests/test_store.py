@@ -6,15 +6,15 @@ import pytest
     [
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/air',
-            '10,10',
+            'lat=10,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lat',
-            '5',
+            'lat=5,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon',
-            '10',
+            'lat=10,air=10,10',
         ),
     ],
 )
@@ -49,14 +49,29 @@ def test_store_zattrs(test_app, store):
 
 
 @pytest.mark.parametrize(
-    'store',
-    ['storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr'],
+    'store,chunks,expected_air_chunks',
+    [
+        (
+            'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr',
+            '',
+            [25, 53],
+        ),
+        (
+            'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr',
+            'lat=10,air=10,10',
+            [10, 10],
+        ),
+    ],
 )
-def test_store_zmetadata(test_app, store):
-    response = test_app.get(f"/{store}/.zmetadata")
+def test_store_zmetadata(test_app, store, chunks, expected_air_chunks):
+    response = test_app.get(f"/{store}/.zmetadata", headers={'chunks': chunks})
     assert response.status_code == 200
 
-    assert {'.zattrs', '.zgroup'}.issubset(response.json()['metadata'].keys())
+    zmetadata = response.json()['metadata']
+
+    assert {'.zattrs', '.zgroup'}.issubset(zmetadata.keys())
+
+    assert zmetadata['air/.zarray']['chunks'] == expected_air_chunks
 
 
 @pytest.mark.parametrize(
@@ -65,17 +80,17 @@ def test_store_zmetadata(test_app, store):
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/air',
             '0.0',
-            '10,10',
+            'lat=10,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lat',
             '0',
-            '5',
+            'lat=10,air=10,10',
         ),
         (
             'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon',
             '1',
-            '10',
+            'lat=10,air=10,10,lon=10',
         ),
     ],
 )
@@ -87,3 +102,13 @@ def test_store_array_chunk(test_app, store, chunk_key, chunks):
     # get the bytes from the response
     data = response.content
     assert isinstance(data, bytes)
+
+
+def test_store_array_chunk_out_of_bounds(test_app):
+    array = 'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon'
+    chunk_key = 1
+    chunks = 'lat=10,air=10,10'
+    response = test_app.get(f"/{array}/{chunk_key}", headers={'chunks': chunks})
+
+    assert response.status_code == 400
+    assert 'The chunk_index: (1,) must be less than the chunks block shape: (1,)' in response.json()['detail']
