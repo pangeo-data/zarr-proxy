@@ -8,7 +8,6 @@ import typing
 
 
 def parse_chunks_header(chunks: str) -> dict[str, tuple[int, ...]]:
-
     """Parse the chunks header into a dictionary of chunk keys and chunk sizes.
 
     This turns a string like "bed=10,10,prec=20,20,lat=5" into a dictionary like
