@@ -1,4 +1,4 @@
-# zarr-proxy
+# Zarr Proxy
 
 _✨ This code is highly experimental! Let the buyer beware ⚠️ ;) ✨_
 
@@ -8,7 +8,7 @@ _✨ This code is highly experimental! Let the buyer beware ⚠️ ;) ✨_
 | **Package** |                                                          [![Conda][conda-badge]][conda-link] [![PyPI][pypi-badge]][pypi-link]                                                          |
 | **License** |                                                                         [![License][license-badge]][repo-link]                                                                         |
 
-A proxy for zarr stores that allows for chunking overrides. This is useful for clients that want to request data in a specific chunking scheme, but the data is stored in a different chunking scheme (e.g. a dataset stored in a chunking scheme that is optimized for fast reading, but the client wants to request data in a chunking scheme that is optimized for fast rendering). One advantage of using a proxy is that we don't need to persistently store the data in multiple chunking schemes. Instead, we can simply request the data in the desired chunking scheme on the fly.
+A proxy for Zarr stores that allows for chunking overrides. This is useful for clients that want to request data in a specific chunking scheme, but the data is stored in a different chunking scheme (e.g. a dataset stored in a chunking scheme that is optimized for fast reading, but the client wants to request data in a chunking scheme that is optimized for fast rendering). One advantage of using a proxy is that we don't need to persistently store the data in multiple chunking schemes. Instead, we can simply request the data in the desired chunking scheme on the fly.
 
 ## Usage
 
@@ -18,7 +18,7 @@ The proxy is a simple [FastAPI](https://fastapi.tiangolo.com/) application. It c
 uvicorn zarr_proxy.main:app --reload
 ```
 
-Once the proxy is running, you can use it to access a zarr store by using the following URL pattern: `http://{PROXY_ADDRESS}/{ZARR_STORE_ADDRESS}`. For example, if the proxy is running on `localhost:8000` and you want to access the zarr store at `https://my.zarr.store`, you would use the following URL: `http://localhost:8000/my.zarr.store`.
+Once the proxy is running, you can use it to access a Zarr store by using the following URL pattern: `http://{PROXY_ADDRESS}/{ZARR_STORE_ADDRESS}`. For example, if the proxy is running on `localhost:8000` and you want to access the Zarr store at `https://my.zarr.store`, you would use the following URL: `http://localhost:8000/my.zarr.store`.
 
 The proxy supports the following HTTP headers:
 
@@ -43,14 +43,14 @@ Once the `.zmetadata` has been retrieved, the client can construct the `chunks` 
 chunks='temperature=256,256,30,pressure=256,256,30'
 ```
 
-We can then use the `chunks` header to construct a `zarr` store and by passing the `chunks` header to the `client_kwargs` argument of the `zarr.storage.FSStore` constructor:
+We can then use the `chunks` header to construct a `Zarr` store and by passing the `chunks` header to the `client_kwargs` argument of the `zarr.storage.FSStore` constructor:
 
 ```python
 import zarr
 store = zarr.storage.FSStore(proxy_zarr_store, client_kwargs={'headers': {"chunks": chunks}})
 ```
 
-This store can be then used via the [xarray](http://xarray.pydata.org/en/stable/) library:
+This store can be then used via the [Xarray](https://docs.xarray.dev/en/stable/) library:
 
 ```python
 import xarray as xr
