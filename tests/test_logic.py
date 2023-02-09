@@ -39,7 +39,6 @@ def test_validate_chunks_info_invalid(shape, chunks, chunk_index, chunks_block_s
 
 
 def test_chunk_id_to_slice():
-
     shape = (2, 4)
     chunks = (1, 2)
 

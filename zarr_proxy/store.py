@@ -63,7 +63,6 @@ def get_zgroup(host: str, path: str) -> dict:
 
 @router.get("/{host}/{path:path}/.zarray")
 def get_zarray(host: str, path: str, chunks: typing.Union[list[str], None] = Header(default=None)) -> dict:
-
     store = open_store(host=host, path=path)
     # Rewrite chunks
     meta = json.loads(store[".zarray"].decode())
@@ -80,7 +79,6 @@ def get_zarray(host: str, path: str, chunks: typing.Union[list[str], None] = Hea
 def get_chunk(
     host: str, path: str, chunk_key: str, chunks: typing.Union[list[str], None] = Header(default=None)
 ) -> bytes:
-
     logger.info(f"Getting chunk: {chunk_key}")
     logger.info(f"Chunks: {chunks}")
     logger.info(f'Host: {host}, Path: {path}')
