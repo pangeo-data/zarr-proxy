@@ -2,9 +2,10 @@ import json
 import typing
 
 import zarr
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Depends, Header, HTTPException
 from starlette.responses import Response
 
+from .config import Settings, format_bytes, get_settings
 from .log import get_logger
 from .logic import chunk_id_to_slice, parse_chunks_header
 
@@ -19,8 +20,11 @@ def open_store(*, host: str, path: str) -> zarr.storage.FSStore:
 
 
 @router.get("/health")
-def ping() -> dict:
-    return {"ping": "pong"}
+def ping(settings: Settings = Depends(get_settings)) -> dict:
+    return {
+        "ping": "pong",
+        "zarr_proxy_payload_size_limit": format_bytes(settings.zarr_proxy_payload_size_limit),
+    }
 
 
 @router.get("/{host}/{path:path}/.zmetadata")
@@ -77,11 +81,16 @@ def get_zarray(host: str, path: str, chunks: typing.Union[list[str], None] = Hea
 
 @router.get("/{host}/{path:path}/{chunk_key}")
 def get_chunk(
-    host: str, path: str, chunk_key: str, chunks: typing.Union[list[str], None] = Header(default=None)
+    host: str,
+    path: str,
+    chunk_key: str,
+    chunks: typing.Union[list[str], None] = Header(default=None),
+    settings: Settings = Depends(get_settings),
 ) -> bytes:
     logger.info(f"Getting chunk: {chunk_key}")
     logger.info(f"Chunks: {chunks}")
     logger.info(f'Host: {host}, Path: {path}')
+    logger.info(f"Settings: {settings}")
 
     chunks = parse_chunks_header(chunks[0]) if chunks is not None else {}
     variable = path.split("/")[-1]
@@ -108,6 +117,13 @@ def get_chunk(
 
     try:
         data = arr[data_slice]
+        size = data.nbytes
+        # check that the size of the data does not exceed the maximum payload size
+        if settings.zarr_proxy_payload_size_limit and (size > settings.zarr_proxy_payload_size_limit):
+            message = f"Chunk with {format_bytes(size)} and shape {variable_chunks} exceeds server's payload size limit of {format_bytes(settings.zarr_proxy_payload_size_limit)}"
+            logger.error(message)
+            raise HTTPException(status_code=400, detail=message)
+
         return Response(data.tobytes(), media_type='application/octet-stream')
 
     except ValueError as exc:
