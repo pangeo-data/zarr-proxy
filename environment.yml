@@ -12,3 +12,4 @@ dependencies:
   - requests
   - uvicorn
   - zarr
+  - pip
