@@ -1,5 +1,7 @@
 import pytest
 
+from zarr_proxy.config import Settings, get_settings
+
 
 @pytest.mark.parametrize(
     'store,chunks',
@@ -126,3 +128,19 @@ def test_store_array_chunk_out_of_bounds(test_app):
 
     assert response.status_code == 400
     assert 'The chunk_index: (1,) must be less than the chunks block shape: (1,)' in response.json()['detail']
+
+
+def test_store_array_payload_size_limit(test_app):
+    def get_settings_override():
+        return Settings(
+            zarr_proxy_payload_size_limit=5,
+        )
+
+    test_app.app.dependency_overrides[get_settings] = get_settings_override
+    array = 'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon'
+    chunk_key = 0
+    chunks = 'lat=10,air=10,10'
+    response = test_app.get(f"/{array}/{chunk_key}", headers={'chunks': chunks})
+
+    assert response.status_code == 400
+    assert "exceeds server's payload size limit of 5 B" in response.json()['detail']

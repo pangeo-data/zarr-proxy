@@ -1,3 +1,5 @@
+import typing
+
 import pydantic
 
 from .log import get_logger
@@ -41,7 +43,7 @@ class Settings(pydantic.BaseSettings):
     zarr_proxy_payload_size_limit: int = None
 
     @pydantic.validator('zarr_proxy_payload_size_limit', pre=True)
-    def _validate_zarr_proxy_payload_size_limit(cls, value: int | str) -> int:
+    def _validate_zarr_proxy_payload_size_limit(cls, value: typing.Union[int, str]) -> int:
         if isinstance(value, int):
             return value
         if isinstance(value, str):
