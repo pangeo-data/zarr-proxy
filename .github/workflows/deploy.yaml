@@ -58,6 +58,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-west-2
 
+      - name: Booststrap CDK
+        run: |
+          yarn cdk bootstrap
+
+      - name: Print CloudFormation template
+        run: |
+          yarn cdk synth
+
       #   # Build inside Docker containers
       # - name: Build lambda function
       #   run: sam build --use-container
