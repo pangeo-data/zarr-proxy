@@ -20,7 +20,7 @@ classifiers = [
 
 dependencies = [
     "aiohttp",
-    "fastapi", 
+    "fastapi",
     "fsspec",
     "requests",
     "zarr",
