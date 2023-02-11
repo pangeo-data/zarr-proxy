@@ -18,6 +18,15 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 
+dependencies = [
+    "aiohttp",
+    "fastapi", 
+    "fsspec",
+    "requests",
+    "zarr",
+    "mangum"
+
+]
 dynamic = ["version"]
 
 
@@ -35,9 +44,6 @@ build-backend = "setuptools.build_meta"
 version_scheme = "post-release"
 local_scheme = "dirty-tag"
 fallback_version = "999"
-
-[tool.isort]
-profile = "black"
 
 
 [tool.coverage.run]
