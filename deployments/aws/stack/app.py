@@ -37,7 +37,10 @@ class ZarrProxyLambdaStack(core.Stack):
             self,
             f"{id}-lambda",
             runtime=runtime,
-            code=aws_lambda.Code.from_docker_build(path=str(pathlib.Path(code_dir).absolute())),
+            code=aws_lambda.Code.from_docker_build(
+                path=str(pathlib.Path(code_dir).absolute()),
+                file="lambda/Dockerfile",
+            ),
             handler="handler.handler",
             memory_size=memory,
             timeout=core.Duration.seconds(timeout),
@@ -52,7 +55,7 @@ class ZarrProxyLambdaStack(core.Stack):
         api = apigw.HttpApi(
             self,
             f"{id}-endpoint",
-            default_integration=apigw_integrations.HttpProxyIntegration(
+            default_integration=apigw_integrations.HttpLambdaIntegration(
                 f"{id}-integration", handler=lambda_function
             ),
         )
