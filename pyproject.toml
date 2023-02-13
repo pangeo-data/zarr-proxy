@@ -23,8 +23,7 @@ dependencies = [
     "fastapi",
     "fsspec",
     "requests",
-    "zarr",
-    "mangum"
+    "zarr"
 
 ]
 dynamic = ["version"]
