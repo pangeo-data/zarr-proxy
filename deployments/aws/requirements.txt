@@ -10,3 +10,4 @@ aws-cdk.aws_ecs_patterns==1.181.0
 
 pydantic
 python-dotenv
+mangum # for aws lambda
