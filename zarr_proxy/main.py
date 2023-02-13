@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from mangum import Mangum
 
 from .log import get_logger
 from .store import router as store_router
@@ -25,6 +24,3 @@ async def startup_event():
 async def shutdown_event():
     logger = get_logger()
     logger.info("Application shutdown...")
-
-
-handler = Mangum(app, lifespan="on")

@@ -1,7 +1,0 @@
-aiohttp
-fastapi
-fsspec
-mangum
-requests
-uvicorn
-zarr
