@@ -3,7 +3,7 @@ name = "zarr-proxy"
 description = "Zarr Proxy"
 readme = "README.md"
 license = { text = "MIT" }
-authors = [{ name = "Pangeo", email = "foo@bar.com" }]
+authors = [{ name = "Pangeo Developers", email = "foo@bar.com" }]
 requires-python = ">=3.9"
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -44,6 +44,8 @@ build-backend = "setuptools.build_meta"
 version_scheme = "post-release"
 local_scheme = "dirty-tag"
 fallback_version = "999"
+
+[tool.setuptools]
 packages = ["zarr_proxy"]
 
 

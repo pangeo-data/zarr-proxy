@@ -25,3 +25,4 @@ class StackSettings(pydantic.BaseSettings):
 
     class Config:
         env_prefix = "ZARR_PROXY_"
+        env_file = ".env"
