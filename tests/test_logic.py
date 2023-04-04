@@ -1,10 +1,6 @@
 import pytest
 
-from zarr_proxy.logic import (
-    chunk_id_to_slice,
-    parse_chunks_header,
-    validate_chunks_info,
-)
+from zarr_proxy.logic import chunk_id_to_slice, parse_chunks_header, validate_chunks_info
 
 
 @pytest.mark.parametrize(
@@ -50,6 +46,7 @@ def test_chunk_id_to_slice():
 @pytest.mark.parametrize(
     "chunks, expected_output",
     [
+        ("", {}),
         ("bed=10,10,prec=20,20,lat=5", {"bed": (10, 10), "prec": (20, 20), "lat": (5,)}),
         ("foo=1,1,bar=2,2", {"foo": (1, 1), "bar": (2, 2)}),
         ("Foo=1,1,BAR=2,2", {"Foo": (1, 1), "BAR": (2, 2)}),
@@ -67,8 +64,30 @@ def test_chunk_id_to_slice():
                 'sea surface temperate': (30, 30),
             },
         ),
+        (
+            "year=31, annual_maximum=1,128,128, days_exceeding_29=1,128,128, days_exceeding_30.5=1,128,128",
+            {
+                "year": (31,),
+                "annual_maximum": (1, 128, 128),
+                "days_exceeding_29": (1, 128, 128),
+                "days_exceeding_30.5": (1, 128, 128),
+            },
+        ),
     ],
 )
 def test_parse_chunks_header(chunks, expected_output):
     output = parse_chunks_header(chunks)
     assert output == expected_output
+
+
+def test_input_with_mixed_delimiters():
+    chunks = "bed=10 10,prec=20;20,lat=5"
+    expected = {"bed": (10, 10), "prec": (20, 20), "lat": (5,)}
+    with pytest.raises(AssertionError):
+        assert parse_chunks_header(chunks) == expected
+
+
+def test_input_with_invalid_characters():
+    chunks = "bed#=10,10,prec$=20,20,lat^=5"
+    expected = {}
+    assert parse_chunks_header(chunks) == expected

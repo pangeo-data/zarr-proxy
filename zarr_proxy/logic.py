@@ -31,7 +31,7 @@ def parse_chunks_header(chunks: str) -> dict[str, tuple[int, ...]]:
     # the character = and then one or more digits (\d) or commas (,). The + following
     # each character class means to match one or more of these characters. The \b at the
     # end of the pattern is a word boundary and ensures that only complete words matching the pattern are returned.
-    parsed_list = re.findall(r'([\w\s_-]+=[\d,]+)\b', chunks)
+    parsed_list = re.findall(r'([\w\s\._-]+=[\d,]+)\b', chunks)
     parsed_dict = {}
     for item in parsed_list:
         key, value = item.strip().split('=')
