@@ -87,10 +87,10 @@ def get_chunk(
     chunks: typing.Union[list[str], None] = Header(default=None),
     settings: Settings = Depends(get_settings),
 ) -> bytes:
-    logger.info(f"Getting chunk: {chunk_key}")
-    logger.info(f"Chunks: {chunks}")
-    logger.info(f'Host: {host}, Path: {path}')
-    logger.info(f"Settings: {settings}")
+    logger.info("Getting chunk: %s", chunk_key)
+    logger.info("Chunks: %s", chunks)
+    logger.info('Host: %s, Path: %s', host, path)
+    logger.info("Settings: %s", settings)
 
     chunks = parse_chunks_header(chunks[0]) if chunks is not None else {}
     variable = path.split("/")[-1]
@@ -99,15 +99,15 @@ def get_chunk(
     store = open_store(host=host, path=path)
     arr = zarr.open(store, mode="r")
     if variable_chunks is None:
-        logger.info(f"No chunks provided, using the default chunks: {arr.chunks}")
+        logger.info("No chunks provided, using the default chunks: %s", arr.chunks)
         variable_chunks = arr.chunks
 
     else:
-        logger.info(f"Using chunks provided: {variable_chunks}")
+        logger.info("Using chunks provided: %s, variable_chunks")
 
     try:
         logger.info(
-            f"Getting chunk: {chunk_key} with chunks: {variable_chunks} from array with shape: {arr.shape}"
+            "Getting chunk: %s with chunks: %s from array with shape: %s", chunk_key, variable_chunks, arr.shape
         )
         data_slice = chunk_id_to_slice(chunk_key, chunks=variable_chunks, shape=arr.shape)
     except IndexError as exc:
@@ -120,14 +120,14 @@ def get_chunk(
         size = data.nbytes
         # check that the size of the data does not exceed the maximum payload size
         if settings.zarr_proxy_payload_size_limit and (size > settings.zarr_proxy_payload_size_limit):
-            message = f"Chunk with {format_bytes(size)} and shape {variable_chunks} exceeds server's payload size limit of {format_bytes(settings.zarr_proxy_payload_size_limit)}"
-            logger.error(message)
+            message = "Chunk with %s and shape %s exceeds server's payload size limit of %s"
+            logger.error(message, format_bytes(size), variable_chunks, format_bytes(settings.zarr_proxy_payload_size_limit))
             raise HTTPException(status_code=400, detail=message)
 
         return Response(data.tobytes(), media_type='application/octet-stream')
 
     except ValueError as exc:
-        message = f"Error getting chunk: {chunk_key} with chunks: {variable_chunks} from array with shape: {arr.shape}. Slice used: {data_slice}"
-        logger.error(message)
+        message = "Error getting chunk: %s with chunks: %s from array with shape: %s. Slice used: %s"
+        logger.error(message, chunk_key, variable_chunks, arr.shape, data_slice)
         logger.error(exc)
         raise HTTPException(status_code=400, detail=message)
