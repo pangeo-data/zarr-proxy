@@ -107,7 +107,10 @@ def get_chunk(
 
     try:
         logger.info(
-            "Getting chunk: %s with chunks: %s from array with shape: %s", chunk_key, variable_chunks, arr.shape
+            "Getting chunk: %s with chunks: %s from array with shape: %s",
+            chunk_key,
+            variable_chunks,
+            arr.shape,
         )
         data_slice = chunk_id_to_slice(chunk_key, chunks=variable_chunks, shape=arr.shape)
     except IndexError as exc:
@@ -121,7 +124,12 @@ def get_chunk(
         # check that the size of the data does not exceed the maximum payload size
         if settings.zarr_proxy_payload_size_limit and (size > settings.zarr_proxy_payload_size_limit):
             message = "Chunk with %s and shape %s exceeds server's payload size limit of %s"
-            logger.error(message, format_bytes(size), variable_chunks, format_bytes(settings.zarr_proxy_payload_size_limit))
+            logger.error(
+                message,
+                format_bytes(size),
+                variable_chunks,
+                format_bytes(settings.zarr_proxy_payload_size_limit),
+            )
             raise HTTPException(status_code=400, detail=message)
 
         return Response(data.tobytes(), media_type='application/octet-stream')
