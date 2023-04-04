@@ -123,13 +123,8 @@ def get_chunk(
         size = data.nbytes
         # check that the size of the data does not exceed the maximum payload size
         if settings.zarr_proxy_payload_size_limit and (size > settings.zarr_proxy_payload_size_limit):
-            message = "Chunk with %s and shape %s exceeds server's payload size limit of %s"
-            logger.error(
-                message,
-                format_bytes(size),
-                variable_chunks,
-                format_bytes(settings.zarr_proxy_payload_size_limit),
-            )
+            message = f"Chunk with {format_bytes(size)} and shape {variable_chunks} exceeds server's payload size limit of {format_bytes(settings.zarr_proxy_payload_size_limit)}"
+            logger.error(message)
             raise HTTPException(status_code=400, detail=message)
 
         return Response(data.tobytes(), media_type='application/octet-stream')
