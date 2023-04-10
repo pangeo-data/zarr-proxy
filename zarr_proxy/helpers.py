@@ -1,9 +1,22 @@
 import json
 import logging
+import traceback
 
 import aiohttp.client_exceptions
 import zarr
 from fastapi import HTTPException
+
+
+def format_exception(exc: str) -> str:
+    """Format an exception as a dictionary.
+
+    Parameters
+    ----------
+    exc : Exception
+        The exception to format.
+
+    """
+    return exc.splitlines()[-1]
 
 
 def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging.Logger) -> dict:
@@ -23,20 +36,30 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
     dict
         The metadata file as a dictionary.
     """
+    details = {}
     try:
         return json.loads(store[key].decode())
     except KeyError as exc:
-        logger.error('Key %s not found in store: %s', key, store)
-        logger.error(exc)
-        raise HTTPException(status_code=404, detail=f"{key} not found in store: {store.path}") from exc
+        details = {
+            'stack_trace': format_exception(traceback.format_exc()),
+            'message': f'{key} not found in store: {store.path}',
+        }
+        raise HTTPException(status_code=404, detail=details) from exc
     except aiohttp.client_exceptions.ClientResponseError as exc:
-        logger.error('ClientResponseError: %s', exc)
-        logger.error(dir(exc))
-        raise HTTPException(status_code=exc.status, detail=str(exc)) from exc
+        details = {'stack_trace': format_exception(traceback.format_exc()), 'message': exc.message}
+        if exc.status == 403:
+            details[
+                'message'
+            ] = f'Access denied to {store.path}. Make sure the dataset store supports public read access and has not been moved or deleted.'
+        raise HTTPException(status_code=exc.status, detail=details) from exc
 
     except Exception as exc:
         logger.error("An error occurred while loading metadata file: %s", exc)
-        raise HTTPException(status_code=500, detail="An error occurred while loading metadata file.") from exc
+        details = {
+            'stack_trace': format_exception(traceback.format_exc()),
+            'message': f'An error occurred while loading metadata file: {exc}',
+        }
+        raise HTTPException(status_code=500, detail=details) from exc
 
 
 def open_store(*, host: str, path: str, logger: logging.Logger) -> zarr.storage.FSStore:
