@@ -22,6 +22,8 @@ def format_exception(exc: str) -> str:
 def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging.Logger) -> dict:
     """Load the metadata file from the store.
 
+    This function loads the metadata file from a given store and returns it as a dictionary.
+
     Parameters
     ----------
     store : zarr.storage.FSStore
@@ -37,15 +39,21 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
         The metadata file as a dictionary.
     """
     details = {}
+
     try:
+        # Load the metadata file from the store and decode it from bytes to string, then parse it as JSON
         return json.loads(store[key].decode())
+
     except KeyError as exc:
+        # If the specified key is not found in the store, raise an HTTPException with a 404 status code
         details = {
             'stack_trace': format_exception(traceback.format_exc()),
             'message': f'{key} not found in store: {store.path}',
         }
         raise HTTPException(status_code=404, detail=details) from exc
+
     except aiohttp.client_exceptions.ClientResponseError as exc:
+        # If there is a client error loading the metadata (e.g. 403 Forbidden), raise an HTTPException with the same status code and detailed message
         details = {'stack_trace': format_exception(traceback.format_exc()), 'message': exc.message}
         if exc.status == 403:
             details[
@@ -54,6 +62,7 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
         raise HTTPException(status_code=exc.status, detail=details) from exc
 
     except Exception as exc:
+        # If there is any other error while loading the metadata, log the error, raise an HTTPException with a 500 status code and a detailed message
         logger.error("An error occurred while loading metadata file: %s", exc)
         details = {
             'stack_trace': format_exception(traceback.format_exc()),
