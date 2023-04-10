@@ -57,7 +57,7 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
         logger.error("An error occurred while loading metadata file: %s", exc)
         details = {
             'stack_trace': format_exception(traceback.format_exc()),
-            'message': f'An error occurred while loading metadata file: {exc}',
+            'message': 'An error occurred while loading metadata file.',
         }
         raise HTTPException(status_code=500, detail=details) from exc
 
