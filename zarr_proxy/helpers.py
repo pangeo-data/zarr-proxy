@@ -56,6 +56,10 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
         # If there is a client error loading the metadata (e.g. 403 Forbidden), raise an HTTPException with the same status code and detailed message
         details = {'stack_trace': format_exception(traceback.format_exc()), 'message': exc.message}
         if exc.status == 403:
+            # S3 stores return a 403 Forbidden error if the client does not have permission to list the bucket contents
+            # This makes it difficult to differentiate between a 404 error (bucket does not exist) and a 403 error
+            # (bucket exists but client does not have permission to list it)
+            # https://stackoverflow.com/questions/19037664/how-do-i-have-an-s3-bucket-return-404-instead-of-403-for-a-key-that-does-not-e
             details[
                 'message'
             ] = f'Access denied to {store.path}. Make sure the dataset store supports public read access and has not been moved or deleted.'
