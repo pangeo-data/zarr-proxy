@@ -1,22 +1,17 @@
-import json
 import typing
 
 import zarr
+import zarr.errors
 from fastapi import APIRouter, Depends, Header, HTTPException
 from starlette.responses import Response
 
 from .config import Settings, format_bytes, get_settings
+from .helpers import load_metadata_file, open_store
 from .log import get_logger
 from .logic import chunk_id_to_slice, parse_chunks_header
 
 router = APIRouter()
 logger = get_logger()
-
-
-def open_store(*, host: str, path: str) -> zarr.storage.FSStore:
-    base_url = f"https://{host}/{path}"
-    logger.info(f"Opening store: {base_url}")
-    return zarr.storage.FSStore(base_url)
 
 
 @router.get("/health")
@@ -30,8 +25,8 @@ def ping(settings: Settings = Depends(get_settings)) -> dict:
 @router.get("/{host}/{path:path}/.zmetadata")
 def get_zmetadata(host: str, path: str, chunks: typing.Union[list[str], None] = Header(default=None)) -> dict:
     chunks = parse_chunks_header(chunks[0]) if chunks is not None else {}
-    store = open_store(host=host, path=path)
-    zmetadata = json.loads(store[".zmetadata"].decode())
+    store = open_store(host=host, path=path, logger=logger)
+    zmetadata = load_metadata_file(store=store, key=".zmetadata", logger=logger)
 
     # Rewrite chunks and compressor in zmetadata
     # TODO: we should probably add more validation here to make sure the specified variables
@@ -55,21 +50,21 @@ def get_zmetadata(host: str, path: str, chunks: typing.Union[list[str], None] = 
 
 @router.get("/{host}/{path:path}/.zattrs")
 def get_zattrs(host: str, path: str) -> dict:
-    store = open_store(host=host, path=path)
-    return json.loads(store[".zattrs"].decode())
+    store = open_store(host=host, path=path, logger=logger)
+    return load_metadata_file(store=store, key=".zattrs", logger=logger)
 
 
 @router.get("/{host}/{path:path}/.zgroup")
 def get_zgroup(host: str, path: str) -> dict:
-    store = open_store(host=host, path=path)
-    return json.loads(store[".zgroup"].decode())
+    store = open_store(host=host, path=path, logger=logger)
+    return load_metadata_file(store=store, key=".zgroup", logger=logger)
 
 
 @router.get("/{host}/{path:path}/.zarray")
 def get_zarray(host: str, path: str, chunks: typing.Union[list[str], None] = Header(default=None)) -> dict:
-    store = open_store(host=host, path=path)
+    store = open_store(host=host, path=path, logger=logger)
     # Rewrite chunks
-    meta = json.loads(store[".zarray"].decode())
+    meta = load_metadata_file(store=store, key=".zarray", logger=logger)
     chunks = parse_chunks_header(chunks[0]) if chunks is not None else {}
     variable = path.split("/")[-1]
     variable_chunks = chunks.get(variable, meta["chunks"])
@@ -96,8 +91,12 @@ def get_chunk(
     variable = path.split("/")[-1]
     variable_chunks = chunks.get(variable, None)
 
-    store = open_store(host=host, path=path)
-    arr = zarr.open(store, mode="r")
+    store = open_store(host=host, path=path, logger=logger)
+    try:
+        arr = zarr.open(store, mode="r")
+    except zarr.errors.PathNotFoundError as exc:
+        logger.error(exc)
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     if variable_chunks is None:
         logger.info("No chunks provided, using the default chunks: %s", arr.chunks)
         variable_chunks = arr.chunks
