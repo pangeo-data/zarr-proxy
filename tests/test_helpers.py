@@ -32,7 +32,8 @@ def test_load_metadata_file_key_error(store_mock, logger_mock):
     with pytest.raises(HTTPException) as exc_info:
         load_metadata_file(store=store_mock, key="metadata_key", logger=logger_mock)
     assert exc_info.value.status_code == 404
-    assert exc_info.value.detail == "metadata_key not found in store: /test/store/path"
+    message = exc_info.value.detail["message"]
+    assert message == "metadata_key not found in store: /test/store/path"
 
 
 def test_load_metadata_file_client_response_error(store_mock, logger_mock):
@@ -54,7 +55,7 @@ def test_load_metadata_file_general_error(store_mock, logger_mock):
     with pytest.raises(HTTPException) as exc_info:
         load_metadata_file(store=store_mock, key="metadata_key", logger=logger_mock)
     assert exc_info.value.status_code == 500
-    assert exc_info.value.detail == "An error occurred while loading metadata file."
+    assert exc_info.value.detail['message'] == "An error occurred while loading metadata file."
 
 
 def test_open_store(logger_mock):
