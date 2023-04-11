@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 import aiohttp
 import pytest
 import zarr
-from fastapi import HTTPException
 
+from zarr_proxy.exceptions import ZarrProxyHTTPException
 from zarr_proxy.helpers import load_metadata_file, open_store
 
 
@@ -29,10 +29,10 @@ def test_load_metadata_file_success(store_mock, logger_mock):
 
 def test_load_metadata_file_key_error(store_mock, logger_mock):
     store_mock.__getitem__.side_effect = KeyError("metadata_key")
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(ZarrProxyHTTPException) as exc_info:
         load_metadata_file(store=store_mock, key="metadata_key", logger=logger_mock)
     assert exc_info.value.status_code == 404
-    message = exc_info.value.detail["message"]
+    message = exc_info.value.message
     assert message == "metadata_key not found in store: /test/store/path"
 
 
@@ -45,17 +45,17 @@ def test_load_metadata_file_client_response_error(store_mock, logger_mock):
     )
 
     store_mock.__getitem__.side_effect = response_error
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(ZarrProxyHTTPException) as exc_info:
         load_metadata_file(store=store_mock, key="metadata_key", logger=logger_mock)
     assert exc_info.value.status_code == 500
 
 
 def test_load_metadata_file_general_error(store_mock, logger_mock):
     store_mock.__getitem__.side_effect = Exception("Unexpected error")
-    with pytest.raises(HTTPException) as exc_info:
+    with pytest.raises(ZarrProxyHTTPException) as exc_info:
         load_metadata_file(store=store_mock, key="metadata_key", logger=logger_mock)
     assert exc_info.value.status_code == 500
-    assert exc_info.value.detail['message'] == "An error occurred while loading metadata file."
+    assert exc_info.value.message == "An error occurred while loading metadata file."
 
 
 def test_open_store(logger_mock):

@@ -3,10 +3,11 @@ import typing
 
 import zarr
 import zarr.errors
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, Header
 from starlette.responses import Response
 
 from .config import Settings, format_bytes, get_settings
+from .exceptions import ZarrProxyHTTPException
 from .helpers import format_exception, load_metadata_file, open_store
 from .log import get_logger
 from .logic import chunk_id_to_slice, parse_chunks_header
@@ -45,7 +46,7 @@ def get_zmetadata(host: str, path: str, chunks: typing.Union[list[str], None] = 
     if not zmetadata_variables.issuperset(chunks.keys()):
         message = f"Invalid chunks header. Variables {sorted(chunks.keys() - zmetadata_variables)} not found in zmetadata: {sorted(zmetadata_variables)}"
         details = {"message": message}
-        raise HTTPException(status_code=400, detail=details)
+        raise ZarrProxyHTTPException(status_code=400, **details)
 
     return zmetadata
 
@@ -99,7 +100,7 @@ def get_chunk(
     except zarr.errors.PathNotFoundError as exc:
         logger.error(exc)
         details = {'message': 'Path not found', 'stack_trace': format_exception(traceback.format_exc())}
-        raise HTTPException(status_code=404, detail=details) from exc
+        raise ZarrProxyHTTPException(status_code=404, **details) from exc
     if variable_chunks is None:
         logger.info("No chunks provided, using the default chunks: %s", arr.chunks)
         variable_chunks = arr.chunks
@@ -122,7 +123,7 @@ def get_chunk(
             'message': 'Invalid chunk key or chunks',
             'stack_trace': format_exception(traceback.format_exc()),
         }
-        raise HTTPException(status_code=400, detail=details)
+        raise ZarrProxyHTTPException(status_code=400, **details)
 
     try:
         data = arr[data_slice]
@@ -132,7 +133,7 @@ def get_chunk(
             message = f"Chunk with {format_bytes(size)} and shape {variable_chunks} exceeds server's payload size limit of {format_bytes(settings.zarr_proxy_payload_size_limit)}"
             logger.error(message)
             details = {'message': message}
-            raise HTTPException(status_code=400, detail=details)
+            raise ZarrProxyHTTPException(status_code=400, **details)
 
         return Response(data.tobytes(), media_type='application/octet-stream')
 
@@ -140,4 +141,4 @@ def get_chunk(
         message = "Error getting chunk: %s with chunks: %s from array with shape: %s. Slice used: %s"
         details = {'message': message, 'stack_trace': format_exception(traceback.format_exc())}
         logger.error(message, chunk_key, variable_chunks, arr.shape, data_slice)
-        raise HTTPException(status_code=400, detail=details) from exc
+        raise ZarrProxyHTTPException(status_code=400, **details) from exc
