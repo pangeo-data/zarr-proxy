@@ -86,7 +86,7 @@ def test_store_mismatching_variable_names(test_app):
     assert response.status_code == 400
     assert (
         "Invalid chunks header. Variables ['airtemp', 'latitude'] not found in zmetadata:"
-        in response.json()['detail']['message']
+        in response.json()['message']
     )
 
 
@@ -129,7 +129,7 @@ def test_store_array_chunk_out_of_bounds(test_app):
     assert response.status_code == 400
     assert (
         'The chunk_index: (1,) must be less than the chunks block shape: (1,)'
-        in response.json()['detail']['stack_trace']
+        in response.json()['stack_trace']
     )
 
 
@@ -146,4 +146,4 @@ def test_store_array_payload_size_limit(test_app):
     response = test_app.get(f"/{array}/{chunk_key}", headers={'chunks': chunks})
 
     assert response.status_code == 400
-    assert "exceeds server's payload size limit of 5 B" in response.json()['detail']['message']
+    assert "exceeds server's payload size limit of 5 B" in response.json()['message']

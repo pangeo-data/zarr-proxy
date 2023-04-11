@@ -4,7 +4,8 @@ import traceback
 
 import aiohttp.client_exceptions
 import zarr
-from fastapi import HTTPException
+
+from .exceptions import ZarrProxyHTTPException
 
 
 def format_exception(exc: str) -> str:
@@ -46,11 +47,12 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
 
     except KeyError as exc:
         # If the specified key is not found in the store, raise an HTTPException with a 404 status code
-        details = {
-            'stack_trace': format_exception(traceback.format_exc()),
-            'message': f'{key} not found in store: {store.path}',
-        }
-        raise HTTPException(status_code=404, detail=details) from exc
+
+        raise ZarrProxyHTTPException(
+            status_code=404,
+            stack_trace=format_exception(traceback.format_exc()),
+            message=f'{key} not found in store: {store.path}',
+        ) from exc
 
     except aiohttp.client_exceptions.ClientResponseError as exc:
         # If there is a client error loading the metadata (e.g. 403 Forbidden), raise an HTTPException with the same status code and detailed message
@@ -63,7 +65,7 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
             details[
                 'message'
             ] = f'Access denied to {store.path}. Make sure the dataset store supports public read access and has not been moved or deleted.'
-        raise HTTPException(status_code=exc.status, detail=details) from exc
+        raise ZarrProxyHTTPException(status_code=exc.status, **details) from exc
 
     except Exception as exc:
         # If there is any other error while loading the metadata, log the error, raise an HTTPException with a 500 status code and a detailed message
@@ -72,7 +74,7 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
             'stack_trace': format_exception(traceback.format_exc()),
             'message': 'An error occurred while loading metadata file.',
         }
-        raise HTTPException(status_code=500, detail=details) from exc
+        raise ZarrProxyHTTPException(status_code=500, **details) from exc
 
 
 def open_store(*, host: str, path: str, logger: logging.Logger) -> zarr.storage.FSStore:
