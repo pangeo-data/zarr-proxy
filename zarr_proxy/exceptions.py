@@ -1,4 +1,5 @@
 import http
+import typing
 
 from fastapi.requests import Request
 from fastapi.responses import JSONResponse
@@ -7,7 +8,9 @@ from fastapi.responses import JSONResponse
 class ZarrProxyHTTPException(Exception):
     """Base class for all exceptions raised by this package."""
 
-    def __init__(self, status_code: int, message: str | None = None, stack_trace: str | None = None):
+    def __init__(
+        self, status_code: int, message: typing.Optional[str] = None, stack_trace: typing.Optional[str] = None
+    ):
         self.status_code = status_code
         if message is None:
             self.message = http.HTTPStatus(status_code).phrase
