@@ -43,7 +43,9 @@ def virtual_array_info(
     *, shape: tuple[int, ...], chunks: tuple[int, ...]
 ) -> dict[str, typing.Union[tuple[int, ...], int]]:
     """
-    Return a dictionary of information about a virtual array
+    Return a dictionary of information about a virtual array. This is
+    is useful for calculating the number of chunks needed when dividing an
+    array into smaller blocks
 
     Parameters
     ----------
@@ -91,17 +93,19 @@ def validate_chunks_info(
     Raises
     ------
     IndexError
-        If the chunk_index is out of bounds
+        If the chunk_index is out of bounds or lengths of chunk_index, chunks, or shape are inconsistent
 
 
     """
-
+    # Check if lengths of chunk_index and chunks are the same
     if len(chunk_index) != len(chunks):
         raise IndexError(f"The length of chunk_index: {chunk_index} and chunks: {chunks} must be the same.")
 
+    # Check if lengths of shape and chunks are the same
     if len(shape) != len(chunks):
         raise IndexError(f"The length of shape: {shape} and chunks: {chunks} must be the same.")
 
+    # Check if the chunk_index is within the bounds of chunks_block_shape
     for index, dim_size in enumerate(chunks_block_shape):
         if chunk_index[index] < 0 or chunk_index[index] >= dim_size:
             raise IndexError(
@@ -117,22 +121,35 @@ def chunk_id_to_slice(
 
     Parameters
     ----------
-    chunk_key: the desired chunk, e.g. "1.3.2"
-    chunks: the desired chunking
-    shape: the total array shape
-    delimiter: chunk separator character
+    chunk_key: str
+        the desired chunk, e.g. "1.3.2"
+    chunks: tuple
+        the desired chunking
+    shape: tuple
+        the total array shape
+    delimiter: str
+        chunk separator character
+
+    Returns
+    -------
+    tuple[slice]
+        the slices to extract the chunk from the array
     """
-    chunk_index = tuple(int(c) for c in chunk_key.split(delimiter))
+    # Convert the chunk key string to a tuple of integers
+    chunk_indices = tuple(int(chunk) for chunk in chunk_key.split(delimiter))
 
     # TODO: more error handling maybe?
+    # Retrieve information about the virtual array
     array_info = virtual_array_info(shape=shape, chunks=chunks)
     validate_chunks_info(
         shape=shape,
         chunks=chunks,
-        chunk_index=chunk_index,
+        chunk_index=chunk_indices,
         chunks_block_shape=array_info["chunks_block_shape"],
     )
+    # Generate slices for the given chunk indices
     slices = tuple(
-        (slice(min(c * ci, s), min(c * (ci + 1), s)) for c, s, ci in zip(chunks, shape, chunk_index))
+        slice(min(chunk_size * chunk_index, dim_size), min(chunk_size * (chunk_index + 1), dim_size))
+        for chunk_size, dim_size, chunk_index in zip(chunks, shape, chunk_indices)
     )
     return slices

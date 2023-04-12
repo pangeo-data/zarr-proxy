@@ -99,14 +99,17 @@ def get_chunk(
         arr = zarr.open(store, mode="r")
     except zarr.errors.PathNotFoundError as exc:
         logger.error(exc)
-        details = {'message': 'Path not found', 'stack_trace': format_exception(traceback.format_exc())}
+        details = {
+            'message': f'Path not found: {store.path}',
+            'stack_trace': format_exception(traceback.format_exc()),
+        }
         raise ZarrProxyHTTPException(status_code=404, **details) from exc
     if variable_chunks is None:
         logger.info("No chunks provided, using the default chunks: %s", arr.chunks)
         variable_chunks = arr.chunks
 
     else:
-        logger.info("Using chunks provided: %s, variable_chunks")
+        logger.info("Using chunks provided: %s", variable_chunks)
 
     try:
         logger.info(
@@ -138,7 +141,7 @@ def get_chunk(
         return Response(data.tobytes(), media_type='application/octet-stream')
 
     except ValueError as exc:
-        message = "Error getting chunk: %s with chunks: %s from array with shape: %s. Slice used: %s"
+        message = f"Error getting chunk: {chunk_key} with chunks: {variable_chunks} from array with shape: {arr.shape}. Slice used: {data_slice}"
         details = {'message': message, 'stack_trace': format_exception(traceback.format_exc())}
-        logger.error(message, chunk_key, variable_chunks, arr.shape, data_slice)
+        logger.error(message)
         raise ZarrProxyHTTPException(status_code=400, **details) from exc
