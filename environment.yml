@@ -13,3 +13,5 @@ dependencies:
   - uvicorn
   - zarr
   - pip
+  - pydantic >= 2.0
+  - pydantic-settings >= 2.0
