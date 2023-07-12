@@ -9,5 +9,5 @@ aws-cdk.aws_autoscaling==1.181.0
 aws-cdk.aws_ecs_patterns==1.181.0
 
 pydantic>=2.0
-pydantic-settings>2.0
+pydantic-settings>=2.0
 python-dotenv
