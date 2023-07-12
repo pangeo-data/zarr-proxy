@@ -1,6 +1,7 @@
 import typing
 
 import pydantic
+import pydantic_settings
 
 from .log import get_logger
 
@@ -39,10 +40,10 @@ def format_bytes(num: int) -> str:
     )
 
 
-class Settings(pydantic.BaseSettings):
-    zarr_proxy_payload_size_limit: int = None
+class Settings(pydantic_settings.BaseSettings):
+    zarr_proxy_payload_size_limit: int = '2 mb'
 
-    @pydantic.validator('zarr_proxy_payload_size_limit', pre=True)
+    @pydantic.field_validator('zarr_proxy_payload_size_limit', mode='before')
     def _validate_zarr_proxy_payload_size_limit(cls, value: typing.Union[int, str]) -> int:
         if isinstance(value, int):
             return value
