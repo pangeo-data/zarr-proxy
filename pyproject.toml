@@ -23,7 +23,9 @@ dependencies = [
     "fastapi",
     "fsspec",
     "requests",
-    "zarr"
+    "zarr",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0"
 
 ]
 dynamic = ["version"]
