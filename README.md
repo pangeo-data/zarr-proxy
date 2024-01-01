@@ -65,24 +65,24 @@ In this example, the `getHeaders()` constructor includes `chunks` headers for al
 
 ```js
 const getHeaders = (variables, zmetadata, axes) => {
-  const headers = []
+  const headers = [];
 
   variables.forEach((variable) => {
-    const existingChunks = zmetadata.metadata[`${variable}/.zarray`].chunks
-    const dims = zmetadata.metadata[`${variable}/.zattrs`]['_ARRAY_DIMENSIONS']
-    const { X, Y } = axes[variable]
+    const existingChunks = zmetadata.metadata[`${variable}/.zarray`].chunks;
+    const dims = zmetadata.metadata[`${variable}/.zattrs`]["_ARRAY_DIMENSIONS"];
+    const { X, Y } = axes[variable];
 
     // cap spatial dimensions at length 256, cap non-spatial dimensions at length 30
-    const limits = dims.map((d) => ([X, Y].includes(d) ? 256 : 30))
-    const override = getChunkShapeOverride(existingChunks, limits)
+    const limits = dims.map((d) => ([X, Y].includes(d) ? 256 : 30));
+    const override = getChunkShapeOverride(existingChunks, limits);
 
     if (override) {
-      shape.push(['chunks', `${variable}=${override.join(',')}`])
+      shape.push(["chunks", `${variable}=${override.join(",")}`]);
     }
-  })
+  });
 
-  return new Headers(headers)
-}
+  return new Headers(headers);
+};
 ```
 
 [github-ci-badge]: https://github.com/pangeo-data/zarr-proxy/actions/workflows/main.yaml/badge.svg
