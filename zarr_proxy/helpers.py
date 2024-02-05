@@ -62,9 +62,9 @@ def load_metadata_file(*, store: zarr.storage.FSStore, key: str, logger: logging
             # This makes it difficult to differentiate between a 404 error (object does not exist) and a 403 error
             # (object exists but client does not have permission to list contents of the bucket)
             # https://stackoverflow.com/questions/19037664/how-do-i-have-an-s3-bucket-return-404-instead-of-403-for-a-key-that-does-not-e
-            details[
-                'message'
-            ] = f'Access denied to {store.path}. Make sure the dataset store supports public read access and has not been moved or deleted.'
+            details['message'] = (
+                f'Access denied to {store.path}. Make sure the dataset store supports public read access and has not been moved or deleted.'
+            )
         raise ZarrProxyHTTPException(status_code=exc.status, **details) from exc
 
     except Exception as exc:

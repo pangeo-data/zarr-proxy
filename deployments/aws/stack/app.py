@@ -1,6 +1,5 @@
 """Construct App."""
 
-
 import pathlib
 import typing
 
