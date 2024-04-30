@@ -21,7 +21,7 @@ from zarr_proxy.config import Settings, get_settings
     ],
 )
 def test_store_zarray(test_app, store, chunks):
-    response = test_app.get(f"/{store}/.zarray", headers={'chunks': chunks})
+    response = test_app.get(f'/{store}/.zarray', headers={'chunks': chunks})
 
     assert response.status_code == 200
 
@@ -44,7 +44,7 @@ def test_store_zarray(test_app, store, chunks):
     ['storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr'],
 )
 def test_store_zattrs(test_app, store):
-    response = test_app.get(f"/{store}/air/.zattrs")
+    response = test_app.get(f'/{store}/air/.zattrs')
     assert response.status_code == 200
 
     assert {'units', 'long_name'}.issubset(response.json().keys())
@@ -66,7 +66,7 @@ def test_store_zattrs(test_app, store):
     ],
 )
 def test_store_zmetadata(test_app, store, chunks, expected_air_chunks):
-    response = test_app.get(f"/{store}/.zmetadata", headers={'chunks': chunks})
+    response = test_app.get(f'/{store}/.zmetadata', headers={'chunks': chunks})
     assert response.status_code == 200
 
     zmetadata = response.json()['metadata']
@@ -77,11 +77,9 @@ def test_store_zmetadata(test_app, store, chunks, expected_air_chunks):
 
 
 def test_store_mismatching_variable_names(test_app):
-    path = (
-        'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/.zmetadata'
-    )
+    path = 'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/.zmetadata'
     chunks = 'latitude=10,airtemp=10,10'
-    response = test_app.get(f"/{path}", headers={'chunks': chunks})
+    response = test_app.get(f'/{path}', headers={'chunks': chunks})
 
     assert response.status_code == 400
     assert (
@@ -111,7 +109,7 @@ def test_store_mismatching_variable_names(test_app):
     ],
 )
 def test_store_array_chunk(test_app, store, chunk_key, chunks):
-    response = test_app.get(f"/{store}/{chunk_key}", headers={'chunks': chunks})
+    response = test_app.get(f'/{store}/{chunk_key}', headers={'chunks': chunks})
 
     assert response.status_code == 200
 
@@ -124,7 +122,7 @@ def test_store_array_chunk_out_of_bounds(test_app):
     array = 'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon'
     chunk_key = 1
     chunks = 'lat=10,air=10,10'
-    response = test_app.get(f"/{array}/{chunk_key}", headers={'chunks': chunks})
+    response = test_app.get(f'/{array}/{chunk_key}', headers={'chunks': chunks})
 
     assert response.status_code == 400
     assert (
@@ -143,7 +141,7 @@ def test_store_array_payload_size_limit(test_app):
     array = 'storage.googleapis.com/carbonplan-maps/ncview/demo/single_timestep/air_temperature.zarr/lon'
     chunk_key = 0
     chunks = 'lat=10,air=10,10'
-    response = test_app.get(f"/{array}/{chunk_key}", headers={'chunks': chunks})
+    response = test_app.get(f'/{array}/{chunk_key}', headers={'chunks': chunks})
 
     assert response.status_code == 400
     assert "exceeds server's payload size limit of 5 B" in response.json()['message']

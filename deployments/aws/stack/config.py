@@ -4,8 +4,8 @@ import pydantic
 
 
 class StackSettings(pydantic.BaseSettings):
-    name: str = "zarr-proxy-deployment"
-    stage: typing.Literal["dev", "prod"] = "prod"
+    name: str = 'zarr-proxy-deployment'
+    stage: typing.Literal['dev', 'prod'] = 'prod'
 
     owner: typing.Optional[str] = None
     client: typing.Optional[str] = None
@@ -24,5 +24,5 @@ class StackSettings(pydantic.BaseSettings):
     max_concurrent: typing.Optional[int] = None
 
     class Config:
-        env_prefix = "ZARR_PROXY_"
-        env_file = ".env"
+        env_prefix = 'ZARR_PROXY_'
+        env_file = '.env'

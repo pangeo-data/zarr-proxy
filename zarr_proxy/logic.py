@@ -62,7 +62,7 @@ def virtual_array_info(
     chunks_block_shape = tuple(math.ceil(s / c) for s, c in zip(shape, chunks)) if shape else 1
     nchunks = functools.reduce(operator.mul, chunks_block_shape, 1)
 
-    return {"chunks_block_shape": chunks_block_shape, "num_chunks": nchunks}
+    return {'chunks_block_shape': chunks_block_shape, 'num_chunks': nchunks}
 
 
 def validate_chunks_info(
@@ -99,22 +99,24 @@ def validate_chunks_info(
     """
     # Check if lengths of chunk_index and chunks are the same
     if len(chunk_index) != len(chunks):
-        raise IndexError(f"The length of chunk_index: {chunk_index} and chunks: {chunks} must be the same.")
+        raise IndexError(
+            f'The length of chunk_index: {chunk_index} and chunks: {chunks} must be the same.'
+        )
 
     # Check if lengths of shape and chunks are the same
     if len(shape) != len(chunks):
-        raise IndexError(f"The length of shape: {shape} and chunks: {chunks} must be the same.")
+        raise IndexError(f'The length of shape: {shape} and chunks: {chunks} must be the same.')
 
     # Check if the chunk_index is within the bounds of chunks_block_shape
     for index, dim_size in enumerate(chunks_block_shape):
         if chunk_index[index] < 0 or chunk_index[index] >= dim_size:
             raise IndexError(
-                f"The chunk_index: {chunk_index} must be less than the chunks block shape: {chunks_block_shape}"
+                f'The chunk_index: {chunk_index} must be less than the chunks block shape: {chunks_block_shape}'
             )
 
 
 def chunk_id_to_slice(
-    chunk_key: str, *, chunks: tuple[int, ...], shape: tuple[int, ...], delimiter: str = "."
+    chunk_key: str, *, chunks: tuple[int, ...], shape: tuple[int, ...], delimiter: str = '.'
 ) -> tuple[slice]:
     """
     Given a Zarr chunk key, return the slice of an array to extract that data
@@ -145,11 +147,13 @@ def chunk_id_to_slice(
         shape=shape,
         chunks=chunks,
         chunk_index=chunk_indices,
-        chunks_block_shape=array_info["chunks_block_shape"],
+        chunks_block_shape=array_info['chunks_block_shape'],
     )
     # Generate slices for the given chunk indices
     slices = tuple(
-        slice(min(chunk_size * chunk_index, dim_size), min(chunk_size * (chunk_index + 1), dim_size))
+        slice(
+            min(chunk_size * chunk_index, dim_size), min(chunk_size * (chunk_index + 1), dim_size)
+        )
         for chunk_size, dim_size, chunk_index in zip(chunks, shape, chunk_indices)
     )
     return slices

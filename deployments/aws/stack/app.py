@@ -3,11 +3,14 @@
 import pathlib
 import typing
 
-from aws_cdk import aws_apigatewayv2 as apigw
-from aws_cdk import aws_apigatewayv2_integrations as apigw_integrations
-from aws_cdk import aws_iam as iam
-from aws_cdk import aws_lambda, core
-from aws_cdk import aws_logs as logs
+from aws_cdk import (
+    aws_apigatewayv2 as apigw,
+    aws_apigatewayv2_integrations as apigw_integrations,
+    aws_iam as iam,
+    aws_lambda,
+    aws_logs as logs,
+    core,
+)
 from config import StackSettings
 
 settings = StackSettings()
@@ -24,7 +27,7 @@ class ZarrProxyLambdaStack(core.Stack):
         concurrent: typing.Optional[int] = None,
         permissions: typing.Optional[list[iam.PolicyStatement]] = None,
         environment: typing.Optional[dict] = None,
-        code_dir: str = "./",
+        code_dir: str = './',
         **kwargs: typing.Any,
     ) -> None:
         super().__init__(scope, id, **kwargs)
@@ -34,13 +37,13 @@ class ZarrProxyLambdaStack(core.Stack):
 
         lambda_function = aws_lambda.Function(
             self,
-            f"{id}-lambda",
+            f'{id}-lambda',
             runtime=runtime,
             code=aws_lambda.Code.from_docker_build(
                 path=str(pathlib.Path(code_dir).absolute()),
-                file="lambda/Dockerfile",
+                file='lambda/Dockerfile',
             ),
-            handler="handler.handler",
+            handler='handler.handler',
             memory_size=memory,
             timeout=core.Duration.seconds(timeout),
             environment=environment,
@@ -53,29 +56,29 @@ class ZarrProxyLambdaStack(core.Stack):
 
         api = apigw.HttpApi(
             self,
-            f"{id}-endpoint",
+            f'{id}-endpoint',
             default_integration=apigw_integrations.HttpLambdaIntegration(
-                f"{id}-integration", handler=lambda_function
+                f'{id}-integration', handler=lambda_function
             ),
         )
 
-        core.CfnOutput(self, "Endpoint", value=api.url)
+        core.CfnOutput(self, 'Endpoint', value=api.url)
 
 
 app = core.App()
 # Tag infrastructure
 for key, value in {
-    "Project": settings.name,
-    "Stack": settings.stage,
-    "Owner": settings.owner,
-    "Client": settings.client,
+    'Project': settings.name,
+    'Stack': settings.stage,
+    'Owner': settings.owner,
+    'Client': settings.client,
 }.items():
     if value:
         core.Tags.of(app).add(key, value)
 
 
 perms = []
-lambda_stackname = f"{settings.name}-lambda-{settings.stage}"
+lambda_stackname = f'{settings.name}-lambda-{settings.stage}'
 ZarrProxyLambdaStack(
     app,
     lambda_stackname,
