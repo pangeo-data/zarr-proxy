@@ -30,16 +30,19 @@ jobs:
         shell: bash -l {0}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up conda environment
-        uses: mamba-org/provision-with-micromamba@v16
+
+      - name: set up conda environment
+        uses: mamba-org/setup-micromamba@v1
         with:
-          micromamba-version: latest
-          channel-priority: strict
           environment-file: environment.yml
-          environment-name: zarr-proxy
-          cache-env: true
-          extra-specs: |
+          init-shell: >-
+            bash
+          create-args: >-
             python=${{ matrix.python-version }}
+
+          cache-environment: true
+          cache-downloads: true
+          post-cleanup: "all"
 
       - name: Install package
         run: |
