@@ -28,15 +28,15 @@ def format_bytes(num: int) -> str:
     """Format bytes as a human readable string"""
     return next(
         (
-            f"{num / value:.2f} {prefix}B"
+            f'{num / value:.2f} {prefix}B'
             for prefix, value in (
-                ("Gi", 2**30),
-                ("Mi", 2**20),
-                ("ki", 2**10),
+                ('Gi', 2**30),
+                ('Mi', 2**20),
+                ('ki', 2**10),
             )
             if num >= value * 0.9
         ),
-        f"{num} B",
+        f'{num} B',
     )
 
 
@@ -59,5 +59,5 @@ class Settings(pydantic_settings.BaseSettings):
 
 
 def get_settings() -> Settings:
-    logger.info("Loading settings from environment variables")
+    logger.info('Loading settings from environment variables')
     return Settings()

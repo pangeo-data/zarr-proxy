@@ -9,7 +9,10 @@ class ZarrProxyHTTPException(Exception):
     """Base class for all exceptions raised by this package."""
 
     def __init__(
-        self, status_code: int, message: typing.Optional[str] = None, stack_trace: typing.Optional[str] = None
+        self,
+        status_code: int,
+        message: typing.Optional[str] = None,
+        stack_trace: typing.Optional[str] = None,
     ):
         self.status_code = status_code
         if message is None:
@@ -19,7 +22,7 @@ class ZarrProxyHTTPException(Exception):
         self.stack_trace = stack_trace
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(status_code={self.status_code!r}, message={self.message!r}, stack_trace={self.stack_trace!r})"
+        return f'{self.__class__.__name__}(status_code={self.status_code!r}, message={self.message!r}, stack_trace={self.stack_trace!r})'
 
 
 async def zarr_proxy_http_exception_handler(
