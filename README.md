@@ -1,5 +1,12 @@
 # Zarr Proxy
 
+> [!WARNING]
+> **This repository is archived and no longer maintained.**
+>
+> `zarr-proxy` was created to work around chunking limitations in earlier versions of Zarr. As of **Zarr v3**, native support for [sharding](https://zarr-specs.readthedocs.io/en/latest/v3/codecs/sharding-indexed/index.html) and flexible chunking makes this proxy unnecessary.
+>
+> We recommend migrating to [Zarr v3](https://zarr.readthedocs.io/en/stable/) directly. This repository will no longer receive updates or bug fixes.
+
 _✨ This code is highly experimental! Let the buyer beware ⚠️ ;) ✨_
 
 | CI          | [![GitHub Workflow Status][github-ci-badge]][github-ci-link] [![Code Coverage Status][codecov-badge]][codecov-link] [![pre-commit.ci status][pre-commit.ci-badge]][pre-commit.ci-link] |
